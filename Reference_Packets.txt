@@ -16,3 +16,5 @@ Packet Format:
 0f 0d 03 00 00 ff 00 c8 00 c8 00 c8 00 00 5b ff ff (EXAMPLE)
                      |
                      Brightness
+
+*NOTE: Bulb will NOT change colour if the verification byte is not valid!!!!! *

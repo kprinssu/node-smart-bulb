@@ -20,48 +20,108 @@ SmartBulbController.prototype.add_bulb = function(bulb_id, smart_bulb)
 //returns a json object representing if the bulb disconnected or not
 SmartBulbController.prototype.disconnect_from_bulb = function(bulb_id)
 {
-	if(bulb_id in connected_smart_bulbs)
+	var bulb = this.connected_smart_bulbs[bulb_id]
+
+	if(bulb)
 	{
-		connected_smart_bulbs[bulb_id].disconnect();
+		bulb.disconnect();
 		return { success: 'Smart bulb was disconnected.' };
 	}
 	else
 	{
-		return { error: "Bulb with id " + bulb_id + " was already disconnected!" };
+		return { error: "Bulb with id " + bulb_id + " was does not exist!" };
 	}
 }
 
 //returns an array of uuids of the bulbs that we are connected to
 //see Reference_Packets.txt on how packets are formatted
 SmartBulbController.prototype.list_all_bulbs = function() {
-	return Object.keys(this.connected_smart_bulbs);
+	return { bulb_ids: Object.keys(this.connected_smart_bulbs) };
 }
 
+//returns an object representing a bulb
+SmartBulbController.prototype.get_bulb = function(bulb_id) {
+	var bulb = this.connected_smart_bulbs[bulb_id]
+
+	if(bulb)
+	{
+		var sanitized_bulb_obj = {};
+		sanitized_bulb_obj.rgb_values = bulb.get_colour().hex;
+		sanitized_bulb_obj.brightness = bulb.get_brightness();
+		sanitized_bulb_obj.on_off_status = bulb.get_turned_on_off_status();
+
+		return sanitized_bulb_obj;
+	}
+	else
+	{
+		return { error: "Bulb with id " + bulb_id + " was does not exist!" }; 
+	}
+
+}
+
+
+//turns off the bulb
 SmartBulbController.prototype.turn_off = function(bulb_id) {
 	var bulb = this.connected_smart_bulbs[bulb_id];
-	bulb.write_data(this.turn_off_buffer);
+
+	if(!bulb)
+	{
+		return { error: "Bulb with id " + bulb_id + " was does not exist!" };
+	}
+
+ 	bulb.write_data(this.turn_off_buffer);
+
+ 	return this.get_bulb(bulb_id);
 }
 
+//turns on the bulb
 SmartBulbController.prototype.turn_on = function(bulb_id) {
 	var bulb = this.connected_smart_bulbs[bulb_id];
+
+	if(!bulb)
+	{
+		return { error: "Bulb with id " + bulb_id + " was does not exist!" };
+	}
+
 	bulb.write_data(this.turn_on_buffer);
+
+	return this.get_bulb(bulb_id);
 }
 
-SmartBulbController.prototype.set_colour = function(bulb_id) {
+//sets a colour for the bulb
+SmartBulbController.prototype.set_colour = function(bulb_id, hex_colour) {
+	var bulb = this.connected_smart_bulbs[bulb_id];
 
+	var rgb_values = hex_to_rgb(hex_colour);
+	var brightness_level = bulb.get_brightness();
+
+	return this.set_colour_and_brightness(bulb_id, rgb_values.hex, brightness_level);
 }
 
-SmartBulbController.prototype.set_brightness = function(bulb_id) {
+//sets the brightness for the bulb
+SmartBulbController.prototype.set_brightness = function(bulb_id, brightness_level) {
+	var bulb = this.connected_smart_bulbs[bulb_id];
+	var rgb_values = bulb.get_colour();
 
+	return this.set_colour_and_brightness(bulb_id, rgb_values.hex, brightness_level);
 }
 
+//sets the colour and brightness
 SmartBulbController.prototype.set_colour_and_brightness = function(bulb_id, hex_colour, brightness_level) {
 	var rgb_values = hex_to_rgb(hex_colour);
 
 	var bulb = this.connected_smart_bulbs[bulb_id];
 
+	if(!bulb)
+	{
+		return { error: "Bulb with id " + bulb_id + " was does not exist!" };
+	}
 
-	//validatin for brightness levels
+	bulb.set_brightness(brightness_level);
+	bulb.set_colour(rgb_values);
+
+
+	//validation for brightness levels
 	//values range from 0 to 200
 	if(brightness_level < 0)
 	{
@@ -104,10 +164,12 @@ SmartBulbController.prototype.set_colour_and_brightness = function(bulb_id, hex_
     }
 
 	bulb.write_data(raw_buffer);
+
+	return this.get_bulb(bulb_id);
 }
 
 //singleton approach for the controller
-var smart_bulb_controller_instance = new SmartBulbController();
+smart_bulb_controller_instance = new SmartBulbController();
 
 //smaller helper function to convert hex to rgb values
 function hex_to_rgb(hex) {
@@ -182,6 +244,3 @@ function connect_to_bulb(bulb)
 		});
 	});
 }
-
-
-exports.smart_bulb_controller = smart_bulb_controller_instance;
