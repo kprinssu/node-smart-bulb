@@ -22,15 +22,8 @@ SmartBulbController.prototype.disconnect_from_bulb = function(bulb_id)
 {
 	var bulb = this.connected_smart_bulbs[bulb_id]
 
-	if(bulb)
-	{
-		bulb.disconnect();
-		return { success: 'Smart bulb was disconnected.' };
-	}
-	else
-	{
-		return { error: "Bulb with id " + bulb_id + " was does not exist!" };
-	}
+	bulb.disconnect();
+	return { success: 'Smart bulb was disconnected.' };
 }
 
 //returns an array of uuids of the bulbs that we are connected to
@@ -64,11 +57,6 @@ SmartBulbController.prototype.get_bulb = function(bulb_id) {
 SmartBulbController.prototype.turn_off = function(bulb_id) {
 	var bulb = this.connected_smart_bulbs[bulb_id];
 
-	if(!bulb)
-	{
-		return { error: "Bulb with id " + bulb_id + " was does not exist!" };
-	}
-
  	bulb.write_data(this.turn_off_buffer);
 
  	return this.get_bulb(bulb_id);
@@ -78,11 +66,6 @@ SmartBulbController.prototype.turn_off = function(bulb_id) {
 SmartBulbController.prototype.turn_on = function(bulb_id) {
 	var bulb = this.connected_smart_bulbs[bulb_id];
 
-	if(!bulb)
-	{
-		return { error: "Bulb with id " + bulb_id + " was does not exist!" };
-	}
-
 	bulb.write_data(this.turn_on_buffer);
 
 	return this.get_bulb(bulb_id);
@@ -91,6 +74,8 @@ SmartBulbController.prototype.turn_on = function(bulb_id) {
 //sets a colour for the bulb
 SmartBulbController.prototype.set_colour = function(bulb_id, hex_colour) {
 	var bulb = this.connected_smart_bulbs[bulb_id];
+
+	console.log(hex_colour);
 
 	var rgb_values = hex_to_rgb(hex_colour);
 	var brightness_level = bulb.get_brightness();
@@ -111,11 +96,6 @@ SmartBulbController.prototype.set_colour_and_brightness = function(bulb_id, hex_
 	var rgb_values = hex_to_rgb(hex_colour);
 
 	var bulb = this.connected_smart_bulbs[bulb_id];
-
-	if(!bulb)
-	{
-		return { error: "Bulb with id " + bulb_id + " was does not exist!" };
-	}
 
 	bulb.set_brightness(brightness_level);
 	bulb.set_colour(rgb_values);
