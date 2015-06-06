@@ -1,0 +1,18 @@
+0f0d0300ffffff000313027f000098ffff (Turn off light right away)
+0f0d0300ffffffc80313027f000060ffff  (Turn on light right away)
+
+0F0403000004FFFF (Turn off Light with fade: Not sure what this does)
+
+0f0d0300ff0000c800c800c800005bffff (RED)
+0f0d03000000ffc800c800c800005bffff (BLUE)
+0f0d030000ff00c800c800c800005bffff (GREEN)
+0f0d0300ffffffc800c800c8000059ffff (WHITE)
+
+
+Packet Format:
+
+ 										  Verfication (sum of all the bytes from index=2 to index < 14) 
+            R   G  B                      |
+0f 0d 03 00 00 ff 00 c8 00 c8 00 c8 00 00 5b ff ff (EXAMPLE)
+                     |
+                     Brightness

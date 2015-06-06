@@ -1,0 +1,187 @@
+/*
+	Code below is for handling the connection between node and the smart bulb via Bluetooth Low Energy (BLE)
+*/
+var SmartBulb = require('./smart_bulb');
+var noble = require('noble');
+
+//Controller class
+function SmartBulbController() {
+	this.connected_smart_bulbs = {};
+}
+
+//adds a bulb to the connected smart bulbs list
+SmartBulbController.prototype.add_bulb = function(bulb_id, smart_bulb)
+{
+	this.connected_smart_bulbs[bulb_id] = smart_bulb;
+	this.turn_off_buffer = new Buffer('0f0d0300ffffff000313027f000098ffff', 'hex');
+	this.turn_on_buffer = new Buffer('0f0d0300ffffffc80313027f000060ffff', 'hex');
+}
+
+//returns a json object representing if the bulb disconnected or not
+SmartBulbController.prototype.disconnect_from_bulb = function(bulb_id)
+{
+	if(bulb_id in connected_smart_bulbs)
+	{
+		connected_smart_bulbs[bulb_id].disconnect();
+		return { success: 'Smart bulb was disconnected.' };
+	}
+	else
+	{
+		return { error: "Bulb with id " + bulb_id + " was already disconnected!" };
+	}
+}
+
+//returns an array of uuids of the bulbs that we are connected to
+//see Reference_Packets.txt on how packets are formatted
+SmartBulbController.prototype.list_all_bulbs = function() {
+	return Object.keys(this.connected_smart_bulbs);
+}
+
+SmartBulbController.prototype.turn_off = function(bulb_id) {
+	var bulb = this.connected_smart_bulbs[bulb_id];
+	bulb.write_data(this.turn_off_buffer);
+}
+
+SmartBulbController.prototype.turn_on = function(bulb_id) {
+	var bulb = this.connected_smart_bulbs[bulb_id];
+	bulb.write_data(this.turn_on_buffer);
+}
+
+SmartBulbController.prototype.set_colour = function(bulb_id) {
+
+}
+
+SmartBulbController.prototype.set_brightness = function(bulb_id) {
+
+}
+
+SmartBulbController.prototype.set_colour_and_brightness = function(bulb_id, hex_colour, brightness_level) {
+	var rgb_values = hex_to_rgb(hex_colour);
+
+	var bulb = this.connected_smart_bulbs[bulb_id];
+
+
+	//validatin for brightness levels
+	//values range from 0 to 200
+	if(brightness_level < 0)
+	{
+		brightness_level = 0;
+	}
+	else if(brightness_level > 200)
+	{
+		brightness_level = 200;
+	}
+
+	var raw_buffer = new Buffer(17);
+
+	raw_buffer[0] = 0x0F; //15
+	raw_buffer[1] = 0x0D; //13
+	raw_buffer[2] = 0x03; //3
+	raw_buffer[3] = 0x00; //empty?
+
+	//RGB and brightness
+	raw_buffer[4] = rgb_values.red;
+	raw_buffer[5] = rgb_values.green;
+	raw_buffer[6] = rgb_values.blue;
+	raw_buffer[7] = brightness_level;
+
+	//x and y coords
+	//no idea what this does, seems like it is related to the multiple bulb lightning?
+    raw_buffer[8] = 0x02;
+    raw_buffer[9] = 0xD1;
+    raw_buffer[10] = 0x01;
+    raw_buffer[11] = 0x66;
+
+    //last 2 bytes are always 0xFF
+    raw_buffer[15] = 0xFF;
+    raw_buffer[16] = 0xFF;
+
+    //verification byte
+    raw_buffer[14] = 0x01; //start off as 1
+    for(var i = 2; i < 14; i++)
+    {
+    	raw_buffer[14] += raw_buffer[i];
+    }
+
+	bulb.write_data(raw_buffer);
+}
+
+//singleton approach for the controller
+var smart_bulb_controller_instance = new SmartBulbController();
+
+//smaller helper function to convert hex to rgb values
+function hex_to_rgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        red: parseInt(result[1], 16),
+        green: parseInt(result[2], 16),
+        blue: parseInt(result[3], 16),
+        hex: hex
+    } : null;
+}
+
+//do not touch the functions below unless you know what you are doing
+//functions below pretain to automatic find/connect of smart bulbs
+
+//only scan for BLE devices when bluetooth device is enabled
+noble.on('stateChange', function(state) {
+	if (state === 'poweredOn') {
+		console.log('Now scanning for Smart Bulbs....');
+		noble.startScanning();
+	} 
+	else {
+		noble.stopScanning();
+	}
+});
+
+//connection handler
+noble.on('discover', function(peripheral) {
+	var advertising_name = peripheral.advertisement.localName;
+
+	//only get our bulbs (all bulbs start with the name DELIGHT)
+	if(advertising_name == 'DELIGHT')
+	{
+		console.log('Found a Revogi Smart Bulb with id ' + peripheral.uuid);
+		noble.stopScanning();
+		connect_to_bulb(peripheral);
+		
+	}
+});
+
+//connect to a smart bulb
+function connect_to_bulb(bulb)
+{
+	bulb.on('disconnect', function() {
+    	//start scanning for another bulb
+    	noble.startScanning();
+	});
+
+	bulb.connect(function(error) {
+		console.log('Connected to bulb with id ' + bulb.uuid);
+
+		bulb.discoverServices(['fff0'], function(error, services)
+		{
+			var main_service = services[0];
+			main_service.discoverCharacteristics(['fff3', 'fff6'], function(error, characteristics)
+			{
+				//get the write characteristic
+				var write_characteristic = characteristics[0];
+
+				//useful later?
+				var friendly_name_characteristic = characteristics[1];
+
+				//add the bulb for tracking 
+				smart_bulb_controller_instance.add_bulb(bulb.uuid, new SmartBulb(bulb, write_characteristic, friendly_name_characteristic));
+				smart_bulb_controller_instance.turn_off(bulb.uuid);
+
+				console.log('Now tracking smart bulb with id ' + bulb.uuid);
+
+				//start scanning for more bulbs
+				noble.startScanning();
+			});
+		});
+	});
+}
+
+
+exports.smart_bulb_controller = smart_bulb_controller_instance;
