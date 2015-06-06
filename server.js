@@ -57,7 +57,7 @@ router.route('/api/bulbs/:bulb_id').get(function(request, response)
 	}
  	else if(turn_on == false && typeof(request.body.turn_on) == 'string')
 	{
-		smart_bulb_controller_instance.turn_off(bulb_id));
+		smart_bulb_controller_instance.turn_off(bulb_id);
 	}
 
  	if(hex_colour && brightness_level)
