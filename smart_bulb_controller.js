@@ -75,8 +75,6 @@ SmartBulbController.prototype.turn_on = function(bulb_id) {
 SmartBulbController.prototype.set_colour = function(bulb_id, hex_colour) {
 	var bulb = this.connected_smart_bulbs[bulb_id];
 
-	console.log(hex_colour);
-
 	var rgb_values = hex_to_rgb(hex_colour);
 	var brightness_level = bulb.get_brightness();
 
@@ -162,6 +160,17 @@ function hex_to_rgb(hex) {
     } : null;
 }
 
+
+//helpers to convert from rgb to hex
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgb_to_hex(rgb) {
+    return "#" + componentToHex(rgb.red) + componentToHex(rgb.green) + componentToHex(rgb.blue);
+}
+
 //do not touch the functions below unless you know what you are doing
 //functions below pretain to automatic find/connect of smart bulbs
 
@@ -213,8 +222,9 @@ function connect_to_bulb(bulb)
 				var friendly_name_characteristic = characteristics[1];
 
 				//add the bulb for tracking 
-				smart_bulb_controller_instance.add_bulb(bulb.uuid, new SmartBulb(bulb, write_characteristic, friendly_name_characteristic));
-				smart_bulb_controller_instance.turn_off(bulb.uuid);
+				var smart_bulb = new SmartBulb(bulb, write_characteristic, friendly_name_characteristic);
+				smart_bulb_controller_instance.add_bulb(bulb.uuid, smart_bulb);
+
 
 				console.log('Now tracking smart bulb with id ' + bulb.uuid);
 
