@@ -1,0 +1,11 @@
+{
+  "name": "node-bulb-api",
+  "description": "REST API for Revogi Bluetooth Low Energy Bulbs",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": ">=4.0.0",
+    "mongoose": ">=4.0.0",
+    "body-parser": ">=1.12.0"
+  }
+}
