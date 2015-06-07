@@ -28,6 +28,31 @@
                 text-decoration: none;
                 background-color: #F5F5F5;
             }
+
+            .glyphicon-spin {
+                -webkit-animation: spin 1000ms infinite linear;
+                animation: spin 1000ms infinite linear;
+            }
+            @-webkit-keyframes spin {
+                0% {
+                    -webkit-transform: rotate(0deg);
+                    transform: rotate(0deg);
+                }
+                100% {
+                    -webkit-transform: rotate(359deg);
+                    transform: rotate(359deg);
+                }
+            }
+            @keyframes spin {
+                0% {
+                    -webkit-transform: rotate(0deg);
+                    transform: rotate(0deg);
+                }
+                100% {
+                    -webkit-transform: rotate(359deg);
+                    transform: rotate(359deg);
+                }
+            }
         </style>
     </head>
 
@@ -57,7 +82,7 @@
                                 <input id="brightness" data-slider-id='brightnessSlider' type="number" data-slider-min="0" data-slider-max="200" data-slider-step="1" data-slider-value="200"/>
                         </div>
                         <div class="col-md-1">
-                            <button id="bulb_controls_submit" class="btn btn-default right" type="submit">Submit</button>
+                            <button id="bulb_controls_submit" class="btn btn-default right" type="submit"><span class="glyphicon glyphicon-refresh glyphicon-spin hide"></span> Submit</button>
                         </div> 
                         <div class="col-md-1">
                             <button id="bulb_controls_back" class="btn btn-default right">Back</button>
@@ -135,6 +160,8 @@
                         var hex_colour = $('#hex_colour').colorpicker('getValue');
                         var brightness =  $('#brightness').slider('getValue');
 
+                        $('#bulb_controls_submit > span').removeClass('hide').prop('disabled', true);
+
                         jQuery.ajax({
                             url: "/api/bulbs/" + bulb_id, 
                             type: "PUT",
@@ -144,6 +171,8 @@
                               "brightness": brightness
                             }, 
                             success: function (data, textStatus, jqXHR) { 
+                                $('#bulb_controls_submit > span').addClass('hide').prop('disabled', false);
+
                                 $('#bulb_id').text(bulb_id);
                                 $("#turn_on").bootstrapSwitch('state', data.turn_on);
 
