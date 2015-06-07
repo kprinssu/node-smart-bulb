@@ -42,7 +42,6 @@ router.route('/api/bulbs/:bulb_id').get(function(request, response)
 	var hex_colour = request.body.hex_colour;
 	var brightness_level = request.body.brightness;
 	var turn_on = request.body.turn_on;
-
 	
 	var bulb = smart_bulb_controller_instance.get_bulb(bulb_id);
 
@@ -52,15 +51,19 @@ router.route('/api/bulbs/:bulb_id').get(function(request, response)
 		return;
 	}
 
-	if(turn_on == true)
+	//only change the state of the bulb if it is 'different from the previous state'
+	if(turn_on != bulb.turn_on)
 	{
-		smart_bulb_controller_instance.turn_on(bulb_id);
-	}
- 	else
-	{
-		console.log(turn_on);
-
-		smart_bulb_controller_instance.turn_off(bulb_id);
+		if(turn_on == true)
+		{
+			smart_bulb_controller_instance.turn_on(bulb_id);
+		}
+	 	else
+		{
+			smart_bulb_controller_instance.turn_off(bulb_id);
+			//do not turn the light on again, so return!
+			return;
+		}
 	}
 
  	if(hex_colour && brightness_level)
