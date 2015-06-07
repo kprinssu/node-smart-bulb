@@ -64,8 +64,8 @@ SmartBulb.prototype.update_internal_data = function (status_packet) {
 			rgb_values = { red: 255, blue: 255, green: 255, hex: 'FFFFFF'};
 
 			rgb_values.red = data[4];
-			rgb_values.blue = data[5];
-			rgb_values.green = data[6];
+			rgb_values.green = data[5];
+			rgb_values.blue = data[6];
 
 			rgb_values.hex = rgb_to_hex(rgb_values);
 			bulb.set_colour(rgb_values);
