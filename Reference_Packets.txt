@@ -1,5 +1,5 @@
-0f0d0300ffffff000313027f000098ffff (Turn off light right away)
-0f0d0300ffffffc80313027f000060ffff  (Turn on light right away)
+0f0d0300ffffff000313027f000098ffff (Turn off light right away) * Notice brightness is 0
+0f0d0300ffffffc80313027f000060ffff  (Turn on light right away) *Notice c8 = 200
 
 0F0403000004FFFF (Turn off Light with fade: Not sure what this does)
 
@@ -11,10 +11,12 @@
 
 Packet Format:
 
- 										  Verfication (sum of all the bytes from index=2 to index < 14) 
+ 										  Verfication (sum of all the bytes from index=2 to index < 14) * NOTE: stricly less than, not <= !!
             R   G  B                      |
 0f 0d 03 00 00 ff 00 c8 00 c8 00 c8 00 00 5b ff ff (EXAMPLE)
                      |
-                     Brightness
+                     Brightness (0 <= x <= 200)
+                     0 is off
+                     200 is max-brightness
 
-*NOTE: Bulb will NOT change colour if the verification byte is not valid!!!!! *
+* NOTE: Bulb will NOT change colour if the verification byte is not valid!!!!! *

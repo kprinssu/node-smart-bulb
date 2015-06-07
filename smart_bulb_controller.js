@@ -197,11 +197,6 @@ noble.on('discover', function(peripheral) {
 //connect to a smart bulb
 function connect_to_bulb(bulb)
 {
-	bulb.on('disconnect', function() {
-    	//start scanning for another bulb
-    	noble.startScanning();
-	});
-
 	bulb.connect(function(error) {
 		console.log('Connected to bulb with id ' + bulb.uuid);
 
