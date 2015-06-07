@@ -111,7 +111,7 @@
                                             var colour = data.hex_colour;
 
                                             $('#hex_colour').colorpicker('setValue', (colour.substring(0, 1) == '#' ? colour : '#' + colour));
-                                            $('#brightness').slider('setValue', data.brightness);
+                                            $('#brightness').slider('setValue', parseInt(data.brightness));
                                         });
                                     }
                                 });
@@ -141,7 +141,7 @@
                                 var colour = data.hex_colour;
 
                                 $('#hex_colour').colorpicker('setValue', (colour.substring(0, 1) == '#' ? colour : '#' + colour));
-                                $('#brightness').slider('setValue', data.brightness);
+                                $('#brightness').slider('setValue', parseInt(data.brightness));
                             }
                         });
                     })

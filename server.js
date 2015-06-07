@@ -54,7 +54,7 @@ router.route('/api/bulbs/:bulb_id').get(function(request, response)
 	//only change the state of the bulb if it is 'different from the previous state'
 	if(turn_on != bulb.turn_on)
 	{
-		if(turn_on == true)
+		if(turn_on == 'true')
 		{
 			smart_bulb_controller_instance.turn_on(bulb_id);
 		}
@@ -102,7 +102,7 @@ function cleanup_bulb_connections(options, err) {
 		return;
 	}
 	already_disconnected = true;
-	
+
 	console.log("Server now shutting down, closing all bulb bluetooth connections...");
 	var bulbs = smart_bulb_controller_instance.list_all_bulbs().bulb_ids;
 
