@@ -149,8 +149,6 @@ SmartBulbController.prototype.set_colour_and_brightness = function(bulb_id, hex_
 
 	bulb.write_data(raw_buffer);
 
-	this.update_bulb_status(bulb_id);
-
 	return this.get_bulb(bulb_id);
 }
 
