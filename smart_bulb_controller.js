@@ -13,8 +13,6 @@ function SmartBulbController() {
 SmartBulbController.prototype.add_bulb = function(bulb_id, smart_bulb)
 {
 	this.connected_smart_bulbs[bulb_id] = smart_bulb;
-	this.turn_off_buffer = new Buffer('0f0d0300ffffff000313027f000098ffff', 'hex');
-	this.turn_on_buffer = new Buffer('0f0d0300ffffffc80313027f000060ffff', 'hex');
 
 	this.status_packet_buffer = new Buffer('0F050400000005FFFF', 'hex');
 }
@@ -58,18 +56,18 @@ SmartBulbController.prototype.get_bulb = function(bulb_id) {
 SmartBulbController.prototype.turn_off = function(bulb_id) {
 	var bulb = this.connected_smart_bulbs[bulb_id];
 
- 	bulb.write_data(this.turn_off_buffer);
+	bulb.set_turned_on_off_status(false);
 
- 	return this.get_bulb(bulb_id);
+	return this.set_brightness(bulb_id, 0);
 }
 
 //turns on the bulb
 SmartBulbController.prototype.turn_on = function(bulb_id) {
 	var bulb = this.connected_smart_bulbs[bulb_id];
 
-	bulb.write_data(this.turn_on_buffer);
+	bulb.set_turned_on_off_status(true);
 
-	return this.get_bulb(bulb_id);
+	return this.set_brightness(bulb_id, 200);
 }
 
 SmartBulbController.prototype.update_bulb_status = function(bulb_id) {        
@@ -91,6 +89,7 @@ SmartBulbController.prototype.set_colour = function(bulb_id, hex_colour) {
 //sets the brightness for the bulb
 SmartBulbController.prototype.set_brightness = function(bulb_id, brightness_level) {
 	var bulb = this.connected_smart_bulbs[bulb_id];
+
 	var rgb_values = bulb.get_colour();
 
 	return this.set_colour_and_brightness(bulb_id, rgb_values.hex, brightness_level);

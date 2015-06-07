@@ -103,8 +103,6 @@
                                         $('#bulb_list').fadeOut(500, function() {
                                             $(this).addClass('hide');
 
-                                            console.log(data)
-
                                             $('#bulb_controls').removeClass('hide');
 
                                             $('#bulb_id').text(bulb_id);
@@ -125,8 +123,6 @@
                         var bulb_id =  $('#bulb_id').text();
                         var turn_on =  $("#turn_on").bootstrapSwitch('state');
 
-                        console.log($("#turn_on").bootstrapSwitch('state'))
-
                         var hex_colour = $('#hex_colour').colorpicker('getValue');
                         var brightness =  $('#brightness').slider('getValue');
 
@@ -139,6 +135,13 @@
                               "brightness": brightness
                             }, 
                             success: function (data, textStatus, jqXHR) { 
+                                $('#bulb_id').text(bulb_id);
+                                $("#turn_on").bootstrapSwitch('state', data.turn_on);
+
+                                var colour = data.hex_colour;
+
+                                $('#hex_colour').colorpicker('setValue', (colour.substring(0, 1) == '#' ? colour : '#' + colour));
+                                $('#brightness').slider('setValue', data.brightness);
                             }
                         });
                     })

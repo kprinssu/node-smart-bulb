@@ -71,6 +71,7 @@ SmartBulb.prototype.update_internal_data = function (status_packet) {
 			bulb.set_colour(rgb_values);
 
 			bulb.set_brightness(data[7]);
+			bulb.set_turned_on_off_status(data[7] != 0);
 		}
 	});
 

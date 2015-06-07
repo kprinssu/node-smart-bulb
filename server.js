@@ -93,6 +93,36 @@ router.route('/api/bulbs/:bulb_id').get(function(request, response)
 //register routes
 app.use('/', router);
 
+//clean bluetooth connections by disconnecting
+var already_disconnected = false;
+function cleanup_bulb_connections(options, err) {
+	
+	if(already_disconnected)
+	{
+		return;
+	}
+	already_disconnected = true;
+	
+	console.log("Server now shutting down, closing all bulb bluetooth connections...");
+	var bulbs = smart_bulb_controller_instance.list_all_bulbs().bulb_ids;
+
+	bulbs.forEach(function (bulb_id)
+	{
+		smart_bulb_controller_instance.disconnect_from_bulb(bulb_id);
+	});
+
+	process.exit();
+}
+
+//do something when app is closing
+process.on('exit', cleanup_bulb_connections.bind(null, null));
+
+//catches ctrl+c event
+process.on('SIGINT', cleanup_bulb_connections.bind(null, null));
+
+//catches uncaught exceptions
+process.on('uncaughtException', cleanup_bulb_connections.bind(null, null));
+
 
 //start the server
 app.listen(port);
