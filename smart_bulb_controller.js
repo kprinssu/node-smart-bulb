@@ -41,9 +41,9 @@ SmartBulbController.prototype.get_bulb = function(bulb_id) {
 	if(bulb)
 	{
 		var sanitized_bulb_obj = {};
-		sanitized_bulb_obj.rgb_values = bulb.get_colour().hex;
+		sanitized_bulb_obj.hex_colour = bulb.get_colour().hex;
 		sanitized_bulb_obj.brightness = bulb.get_brightness();
-		sanitized_bulb_obj.on_off_status = bulb.get_turned_on_off_status();
+		sanitized_bulb_obj.turn_on = bulb.get_turned_on_off_status();
 
 		return sanitized_bulb_obj;
 	}

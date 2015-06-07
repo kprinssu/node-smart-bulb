@@ -13,7 +13,7 @@
         <!-- Bootstrap core CSS -->
         <link href="css/bootstrap.min.css" rel="stylesheet">
         <link href="css/bootstrap-colorpicker.min.css" rel="stylesheet">
-        <link href="css/bootstrap-toggle.min.css" rel="stylesheet">
+        <link href="css/bootstrap-switch.min.css" rel="stylesheet">
         <link href="css/bootstrap-slider.min.css" rel="stylesheet">
        
 
@@ -22,23 +22,49 @@
                 padding-right: 25px;
                 padding-bottom: 15px;
             }
+
+            ul.list-group > li:hover {
+                color: #555;
+                text-decoration: none;
+                background-color: #F5F5F5;
+            }
         </style>
     </head>
 
     <body>
         <div class="container">
-            <div class="panel panel-default">
+            <div id="bulb_list" class="panel panel-default">
+                <div class="panel-heading">List of Connected Bulbs</div>
+                <div class="panel-body">
+                    <ul id="bulb_list_ul" class="list-group">
+                      
+                    </ul>
+                </div>
+            </div>
+            <div id="bulb_controls" class="panel panel-default hide">
                 <div class="panel-heading">Bulb Controls</div>
                 <div class="panel-body">
-                    <label for="turn_on">Turn on/off Light</label>
-                    <input id="turn_on" name="turn_on" checked data-toggle="toggle" type="checkbox">
+                    <div class="row">
+                        <div class="col-md-1">
+                        </div>
+                        <div class="col-md-10">
+                                <input type="text" id="bulb_id" class="hide">
+                                <label for="turn_on">Turn on/off Light</label>
+                                <input id="turn_on" name="turn_on" type="checkbox">
+                                <br>
+                                <label for="hex_colour">Colour</label>
+                                <input type="text" id="hex_colour" value="#FFFFFF" />
+                                <br>
+                                <label for="brightness">Brightness</label>
+                                <input id="brightness" data-slider-id='brightnessSlider' type="number" data-slider-min="0" data-slider-max="200" data-slider-step="1" data-slider-value="200"/>
+                        </div>
+                        <div class="col-md-1">
+                            <button id="bulb_controls_submit" class="btn btn-default right" type="submit">Submit</button>
+                        </div>
+                    </div>
+
                     <br>
-                    <label for="hex_colour">Colour</label>
-                    <input type="text" id="hex_colour" value="#FFFFFF" />
-                    <br>
-                    <label for="brightness">Brightness</label>
-                    <input id="brightness" data-slider-id='brightnessSlider' type="number" data-slider-min="0" data-slider-max="200" data-slider-step="1" data-slider-value="200"/>
-                    <br>
+                    
                 </div>
             </div>
 
@@ -46,11 +72,79 @@
             <script src="js/jquery.min.js"></script>
             <script src="js/bootstrap.min.js"></script>
             <script src="js/bootstrap-colorpicker.min.js"></script>
-            <script src="js/bootstrap-toggle.min.js"></script>
+            <script src="js/bootstrap-switch.min.js"></script>
             <script src="js/bootstrap-slider.min.js"></script>
 
             <script>
                 $(function(){
+
+                    //get the list of bulbs
+                    $.ajax({
+                        url: "/api/bulbs", 
+                        type: "GET",
+                        success: function (data, textStatus, jqXHR) { 
+                            var bulb_ids = data.bulb_ids;
+
+                            var list_container = $('#bulb_list_ul');
+
+                            bulb_ids.forEach(function (element)
+                            {
+                                list_container.prepend('<li class="list-group-item">' + element + '</li>');
+                            });
+
+                            //click event
+                            $('#bulb_list_ul > li').click(function (event)
+                            {
+                                var bulb_id = $(this).text();
+                                $.ajax({
+                                    url: "/api/bulbs/" + bulb_id, 
+                                    type: "GET",
+                                    success: function (data, textStatus, jqXHR) {
+                                        $('#bulb_list').fadeOut(500, function() {
+                                            $(this).addClass('hide');
+
+                                            console.log(data)
+
+                                            $('#bulb_controls').removeClass('hide');
+
+                                            $('#bulb_id').text(bulb_id);
+                                            $("#turn_on").bootstrapSwitch('state', data.turn_on);
+
+                                            var colour = data.hex_colour;
+
+                                            $('#hex_colour').colorpicker('setValue', (colour.substring(0, 1) == '#' ? colour : '#' + colour));
+                                            $('#brightness').slider('setValue', data.brightness);
+                                        });
+                                    }
+                                });
+                            });
+                        }
+                    });
+
+                    $('#bulb_controls_submit').click(function(){
+                        var bulb_id =  $('#bulb_id').text();
+                        var turn_on =  $("#turn_on").bootstrapSwitch('state');
+
+                        console.log($("#turn_on").bootstrapSwitch('state'))
+
+                        var hex_colour = $('#hex_colour').colorpicker('getValue');
+                        var brightness =  $('#brightness').slider('getValue');
+
+                        jQuery.ajax({
+                            url: "/api/bulbs/" + bulb_id, 
+                            type: "PUT",
+                            data: {
+                              "turn_on": turn_on,  
+                              "hex_colour": hex_colour,  
+                              "brightness": brightness
+                            }, 
+                            success: function (data, textStatus, jqXHR) { 
+                            }
+                        });
+                    })
+
+                    $("#turn_on").bootstrapSwitch();
+
                     $('#hex_colour').colorpicker({
                         format: 'hex'
                     });

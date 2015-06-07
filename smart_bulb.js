@@ -55,27 +55,28 @@ SmartBulb.prototype.get_turned_on_off_status = function () {
 //sends a request status packet to bulb
 //the bulb then replies back with the same encoding
 SmartBulb.prototype.update_internal_data = function (status_packet) {
+	var bulb = this;
 	this.reading_characteristic.on('read', function(data, is_notification)
 	{
 		//check if the first two bytes are "right	"
 		if(data[0] == 0x0F && data[1] == 0x0E)
 		{
-			this.rgb_values.red = data[4];
-			this.rgb_values.red = data[5];
-			this.rgb_values.red = data[6];
+			rgb_values = { red: 255, blue: 255, green: 255, hex: 'FFFFFF'};
 
-			this.rgb_values.hex = rgb_to_hex(this.rgb_values);
+			rgb_values.red = data[4];
+			rgb_values.blue = data[5];
+			rgb_values.green = data[6];
 
-			this.brightness_level = data[7];
+			rgb_values.hex = rgb_to_hex(rgb_values);
+			bulb.set_colour(rgb_values);
+
+			bulb.set_brightness(data[7]);
 		}
 	});
 
-	//scope issues (that's why i need to copy the write charateristic)..
-	var write_characteristic = this.write_characteristic;
-
 	this.reading_characteristic.notify(true, function()
 	{
-		write_characteristic.write(status_packet, false, function(error) {});
+		bulb.write_data(status_packet, false, function(error) {});
 	});
 }
 
