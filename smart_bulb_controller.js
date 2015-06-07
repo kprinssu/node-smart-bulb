@@ -15,6 +15,8 @@ SmartBulbController.prototype.add_bulb = function(bulb_id, smart_bulb)
 	this.connected_smart_bulbs[bulb_id] = smart_bulb;
 	this.turn_off_buffer = new Buffer('0f0d0300ffffff000313027f000098ffff', 'hex');
 	this.turn_on_buffer = new Buffer('0f0d0300ffffffc80313027f000060ffff', 'hex');
+
+	this.status_packet_buffer = new Buffer('0F050400000005FFFF', 'hex');
 }
 
 //returns a json object representing if the bulb disconnected or not
@@ -69,6 +71,12 @@ SmartBulbController.prototype.turn_on = function(bulb_id) {
 	bulb.write_data(this.turn_on_buffer);
 
 	return this.get_bulb(bulb_id);
+}
+
+SmartBulbController.prototype.update_bulb_status = function(bulb_id) {        
+	var bulb = this.connected_smart_bulbs[bulb_id];
+
+	bulb.update_internal_data(this.status_packet_buffer);
 }
 
 //sets a colour for the bulb
@@ -143,6 +151,8 @@ SmartBulbController.prototype.set_colour_and_brightness = function(bulb_id, hex_
 
 	bulb.write_data(raw_buffer);
 
+	this.update_bulb_status(bulb_id);
+
 	return this.get_bulb(bulb_id);
 }
 
@@ -213,17 +223,21 @@ function connect_to_bulb(bulb)
 		bulb.discoverServices(['fff0'], function(error, services)
 		{
 			var main_service = services[0];
-			main_service.discoverCharacteristics(['fff3', 'fff6'], function(error, characteristics)
+			main_service.discoverCharacteristics(['fff3', 'fff4', 'fff6'], function(error, characteristics)
 			{
 				//get the write characteristic
 				var write_characteristic = characteristics[0];
 
+				//reading characteristic
+				var reading_characteristic = characteristics[1];
+
 				//useful later?
-				var friendly_name_characteristic = characteristics[1];
+				var friendly_name_characteristic = characteristics[2];
 
 				//add the bulb for tracking 
-				var smart_bulb = new SmartBulb(bulb, write_characteristic, friendly_name_characteristic);
+				var smart_bulb = new SmartBulb(bulb, write_characteristic, reading_characteristic, friendly_name_characteristic);
 				smart_bulb_controller_instance.add_bulb(bulb.uuid, smart_bulb);
+				smart_bulb_controller_instance.update_bulb_status(bulb.uuid);
 
 
 				console.log('Now tracking smart bulb with id ' + bulb.uuid);

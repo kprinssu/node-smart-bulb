@@ -1,10 +1,11 @@
 var noble = require('noble');
 
 //class to hold all the logic 
-function SmartBulb(noble_bulb_interface, write_characteristic, friendly_name_characteristic)
+function SmartBulb(noble_bulb_interface, write_characteristic, reading_characteristic, friendly_name_characteristic)
 {
 	this.bulb = noble_bulb_interface;
 	this.write_characteristic = write_characteristic;
+	this.reading_characteristic = reading_characteristic;
 	this.friendly_name_characteristic = friendly_name_characteristic;
 
 	this.brightness_level = 200;
@@ -49,6 +50,29 @@ SmartBulb.prototype.set_turned_on_off_status = function (status) {
 
 SmartBulb.prototype.get_turned_on_off_status = function () {
 	return this.turned_on;
+}
+
+SmartBulb.prototype.update_internal_data = function (status_packet) {
+	this.reading_characteristic.on('read', function(data, is_notification)
+	{
+		//check if the first two bytes are "right	"
+		if(data[0] == 0x0F && data[1] == 0x0E)
+		{
+			this.rgb_values.red = data[4];
+			this.rgb_values.red = data[5];
+			this.rgb_values.red = data[6];
+
+			this.brightness_level = data[7];
+		}
+	});
+
+	//scope issues..
+	var write_characteristic = this.write_characteristic;
+
+	this.reading_characteristic.notify(true, function()
+	{
+		write_characteristic.write(status_packet, false, function(error) {});
+	});
 }
 
 

@@ -14,6 +14,8 @@
         <link href="css/bootstrap.min.css" rel="stylesheet">
         <link href="css/bootstrap-colorpicker.min.css" rel="stylesheet">
         <link href="css/bootstrap-toggle.min.css" rel="stylesheet">
+        <link href="css/bootstrap-slider.min.css" rel="stylesheet">
+       
 
         <style>
             label {
@@ -34,6 +36,9 @@
                     <label for="hex_colour">Colour</label>
                     <input type="text" id="hex_colour" value="#FFFFFF" />
                     <br>
+                    <label for="brightness">Brightness</label>
+                    <input id="brightness" data-slider-id='brightnessSlider' type="number" data-slider-min="0" data-slider-max="200" data-slider-step="1" data-slider-value="200"/>
+                    <br>
                 </div>
             </div>
 
@@ -42,14 +47,22 @@
             <script src="js/bootstrap.min.js"></script>
             <script src="js/bootstrap-colorpicker.min.js"></script>
             <script src="js/bootstrap-toggle.min.js"></script>
+            <script src="js/bootstrap-slider.min.js"></script>
 
             <script>
                 $(function(){
                     $('#hex_colour').colorpicker({
                         format: 'hex'
                     });
+
+                    $('#brightness').slider({
+                        formatter: function(value) {
+                            return 'Brightness level: ' + value;
+                        }
+                    });
                 });
             </script>
         </div>
     </body>
 </html>
+    
