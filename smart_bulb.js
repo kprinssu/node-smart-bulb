@@ -52,6 +52,8 @@ SmartBulb.prototype.get_turned_on_off_status = function () {
 	return this.turned_on;
 }
 
+//sends a request status packet to bulb
+//the bulb then replies back with the same encoding
 SmartBulb.prototype.update_internal_data = function (status_packet) {
 	this.reading_characteristic.on('read', function(data, is_notification)
 	{
@@ -62,11 +64,13 @@ SmartBulb.prototype.update_internal_data = function (status_packet) {
 			this.rgb_values.red = data[5];
 			this.rgb_values.red = data[6];
 
+			this.rgb_values.hex = rgb_to_hex(this.rgb_values);
+
 			this.brightness_level = data[7];
 		}
 	});
 
-	//scope issues..
+	//scope issues (that's why i need to copy the write charateristic)..
 	var write_characteristic = this.write_characteristic;
 
 	this.reading_characteristic.notify(true, function()
@@ -98,7 +102,15 @@ SmartBulb.prototype.disconnect = function() {
 	this.connected = false;
 }
 
+//helpers to convert from rgb to hex
+function rgb_component_to_hex(component) {
+    var hex = component.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
 
+function rgb_to_hex(rgb) {
+    return "#" + rgb_component_to_hex(rgb.red) + rgb_component_to_hex(rgb.green) + rgb_component_to_hex(rgb.blue);
+}
 
 
 module.exports = SmartBulb;

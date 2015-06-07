@@ -51,7 +51,6 @@ SmartBulbController.prototype.get_bulb = function(bulb_id) {
 	{
 		return { error: "Bulb with id " + bulb_id + " was does not exist!" }; 
 	}
-
 }
 
 
@@ -168,17 +167,6 @@ function hex_to_rgb(hex) {
         blue: parseInt(result[3], 16),
         hex: hex
     } : null;
-}
-
-
-//helpers to convert from rgb to hex
-function componentToHex(c) {
-    var hex = c.toString(16);
-    return hex.length == 1 ? "0" + hex : hex;
-}
-
-function rgb_to_hex(rgb) {
-    return "#" + componentToHex(rgb.red) + componentToHex(rgb.green) + componentToHex(rgb.blue);
 }
 
 //do not touch the functions below unless you know what you are doing
