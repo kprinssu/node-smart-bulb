@@ -8,6 +8,8 @@
 0f0d030000ff00c800c800c800005bffff (GREEN)
 0f0d0300ffffffc800c800c8000059ffff (WHITE)
 
+0F050400000005FFFF (Requests for an update of the bulb)
+
 
 Packet Format:
 
