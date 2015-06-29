@@ -1,12 +1,12 @@
-#node-bulb-api
+# node-bulb-api
 Allows you to control a Revogi Smart Bulb on OSX or Linux. 
 
-#Requirements
+# Requirements
 * Linux or OSX (Windows is currently not supported)
 * Bluetooth Low Energy (most BT4.0 devices are capable of BLE)
 * NodeJS with NPM
 
-#Installation
+# Installation
 1. Install the depencies using NPM:
 ````
 npm install
