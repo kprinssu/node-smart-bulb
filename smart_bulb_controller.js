@@ -131,10 +131,12 @@ SmartBulbController.prototype.set_colour_and_brightness = function(bulb_id, hex_
 
 	//x and y coords
 	//no idea what this does, seems like it is related to the multiple bulb lightning?
-    raw_buffer[8] = 0x02;
-    raw_buffer[9] = 0xD1;
-    raw_buffer[10] = 0x01;
-    raw_buffer[11] = 0x66;
+    raw_buffer[8] = 0x00;
+    raw_buffer[9] = 0xC8;
+    raw_buffer[10] = 0x00;
+    raw_buffer[11] = 0xC8;
+    raw_buffer[12] = 0x00;
+    raw_buffer[13] = 0x00;
 
     //last 2 bytes are always 0xFF
     raw_buffer[15] = 0xFF;
