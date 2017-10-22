@@ -185,7 +185,7 @@ noble.on('discover', function(peripheral) {
 	var advertising_name = peripheral.advertisement.localName;
 
 	//only get our bulbs (all bulbs start with the name DELIGHT)
-	if(advertising_name == 'DELIGHT')
+	if(advertising_name == 'DELIGHT' || advertising_name == 'BLEBULB-10')
 	{
 		console.log('Found a Revogi Smart Bulb with id ' + peripheral.uuid);
 		noble.stopScanning();
