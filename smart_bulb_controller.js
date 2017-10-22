@@ -20,9 +20,12 @@ SmartBulbController.prototype.add_bulb = function(bulb_id, smart_bulb)
 //returns a json object representing if the bulb disconnected or not
 SmartBulbController.prototype.disconnect_from_bulb = function(bulb_id)
 {
-	var bulb = this.connected_smart_bulbs[bulb_id]
+	var bulb = this.connected_smart_bulbs[bulb_id];
 
-	bulb.disconnect();
+	if (bulb) {
+		bulb.disconnect();
+		delete this.connected_smart_bulbs[bulb_id];
+	}
 	return { success: 'Smart bulb was disconnected.' };
 }
 
@@ -186,6 +189,9 @@ noble.on('stateChange', function(state) {
 noble.on('discover', function(peripheral) {
 	var advertising_name = peripheral.advertisement.localName;
 
+	if (smart_bulb_controller_instance.connected_smart_bulbs[peripheral.uuid]) {
+		return;
+	}
 	//only get our bulbs (all bulbs start with the name DELIGHT)
 	if(advertising_name == 'DELIGHT' || advertising_name == 'BLEBULB-10')
 	{
@@ -227,6 +233,12 @@ function connect_to_bulb(bulb)
 				//start scanning for more bulbs
 				noble.startScanning();
 			});
+		});
+		bulb.on('disconnect', function(error) {
+			console.log("Disconnected from " + bulb.uuid);
+			noble.stopScanning();
+			smart_bulb_controller_instance.disconnect_from_bulb(bulb.uuid);
+			noble.startScanning();
 		});
 	});
 }
