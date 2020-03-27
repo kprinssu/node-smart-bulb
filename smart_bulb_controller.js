@@ -20,9 +20,12 @@ SmartBulbController.prototype.add_bulb = function(bulb_id, smart_bulb)
 //returns a json object representing if the bulb disconnected or not
 SmartBulbController.prototype.disconnect_from_bulb = function(bulb_id)
 {
-	var bulb = this.connected_smart_bulbs[bulb_id]
+	var bulb = this.connected_smart_bulbs[bulb_id];
 
-	bulb.disconnect();
+	if (bulb) {
+		bulb.disconnect();
+		delete this.connected_smart_bulbs[bulb_id];
+	}
 	return { success: 'Smart bulb was disconnected.' };
 }
 
@@ -131,10 +134,12 @@ SmartBulbController.prototype.set_colour_and_brightness = function(bulb_id, hex_
 
 	//x and y coords
 	//no idea what this does, seems like it is related to the multiple bulb lightning?
-    raw_buffer[8] = 0x02;
-    raw_buffer[9] = 0xD1;
-    raw_buffer[10] = 0x01;
-    raw_buffer[11] = 0x66;
+    raw_buffer[8] = 0x00;
+    raw_buffer[9] = 0xC8;
+    raw_buffer[10] = 0x00;
+    raw_buffer[11] = 0xC8;
+    raw_buffer[12] = 0x00;
+    raw_buffer[13] = 0x00;
 
     //last 2 bytes are always 0xFF
     raw_buffer[15] = 0xFF;
@@ -184,8 +189,11 @@ noble.on('stateChange', function(state) {
 noble.on('discover', function(peripheral) {
 	var advertising_name = peripheral.advertisement.localName;
 
+	if (smart_bulb_controller_instance.connected_smart_bulbs[peripheral.uuid]) {
+		return;
+	}
 	//only get our bulbs (all bulbs start with the name DELIGHT)
-	if(advertising_name == 'DELIGHT')
+	if(advertising_name == 'DELIGHT' || advertising_name == 'BLEBULB-10')
 	{
 		console.log('Found a Revogi Smart Bulb with id ' + peripheral.uuid);
 		noble.stopScanning();
@@ -225,6 +233,12 @@ function connect_to_bulb(bulb)
 				//start scanning for more bulbs
 				noble.startScanning();
 			});
+		});
+		bulb.on('disconnect', function(error) {
+			console.log("Disconnected from " + bulb.uuid);
+			noble.stopScanning();
+			smart_bulb_controller_instance.disconnect_from_bulb(bulb.uuid);
+			noble.startScanning();
 		});
 	});
 }

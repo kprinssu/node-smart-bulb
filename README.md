@@ -22,3 +22,28 @@ node server.js
 ````
 http://<your ip here>:3000
 ````
+# Homebridge
+
+API for [homebridge-better-http-rgb](https://github.com/jnovack/homebridge-better-http-rgb).
+
+Example for Homebridge config file.
+````
+{
+  "accessory": "HTTP-RGB",
+  "name": "MyBulb",
+  "switch": {
+    "status": "http://localhost:3000/api/homebridge/<Bulb ID>/status",
+    "powerOn": "http://localhost:3000/api/homebridge/<Bulb ID>/status/1",
+    "powerOff": "http://localhost:3000/api/homebridge/<Bulb ID>/status/0"
+  },
+  "brightness": {
+    "status": "http://localhost:3000/api/homebridge/<Bulb ID>/brightness",
+    "url": "http://localhost:3000/api/homebridge/<Bulb ID>/brightness/%s"
+  },
+  "color": {
+    "status": "http://localhost:3000/api/homebridge/<Bulb ID>/color",
+    "url": "http://localhost:3000/api/homebridge/<Bulb ID>/color/%s",
+    "brightness": true
+  }
+}
+````

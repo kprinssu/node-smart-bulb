@@ -90,6 +90,45 @@ router.route('/api/bulbs/:bulb_id').get(function(request, response)
 	smart_bulb_controller_instance.disconnect_from_bulb(bulb_id);
 });
 
+router.route('/api/homebridge/:bulb_id/status').get(function(request, response)
+{
+	var bulb_id = request.params.bulb_id;
+	var bulb = smart_bulb_controller_instance.get_bulb(bulb_id);
+	response.send(bulb.turn_on ? "1" : "0");
+});
+router.route('/api/homebridge/:bulb_id/status/:sw').get((req, res) => {
+  var bulb_id = req.params.bulb_id;
+  var sw =  req.params.sw;
+  if (sw > 0) {
+    smart_bulb_controller_instance.turn_on(bulb_id);
+  } else {
+    smart_bulb_controller_instance.turn_off(bulb_id);
+  }
+  res.send('OK');
+});
+router.route('/api/homebridge/:bulb_id/brightness').get((req, res) => {
+  var bulb_id = req.params.bulb_id;
+  var bulb = smart_bulb_controller_instance.get_bulb(bulb_id);
+  res.send((bulb.brightness / 2).toString());
+});
+router.route('/api/homebridge/:bulb_id/brightness/:val').get((req, res) => {
+  var bulb_id = req.params.bulb_id;
+  var val =  req.params.val;
+  smart_bulb_controller_instance.set_brightness(bulb_id, val * 2);
+  res.send('OK');
+});
+router.route('/api/homebridge/:bulb_id/color').get((req, res) => {
+  var bulb_id = req.params.bulb_id;
+  var bulb = smart_bulb_controller_instance.get_bulb(bulb_id);
+  res.send(bulb.hex_colour.substr(1));
+});
+router.route('/api/homebridge/:bulb_id/color/:val').get((req, res) => {
+  var bulb_id = req.params.bulb_id;
+  var val =  req.params.val;
+  smart_bulb_controller_instance.set_colour(bulb_id, '#' + val);
+  res.send('OK');
+});
+
 //register routes
 app.use('/', router);
 
